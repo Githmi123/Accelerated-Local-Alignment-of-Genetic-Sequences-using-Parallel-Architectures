@@ -3,3 +3,6 @@ data/DNASequences.txt
 .vscode/
 
 output/
+
+# Compiled binaries
+serial_code
