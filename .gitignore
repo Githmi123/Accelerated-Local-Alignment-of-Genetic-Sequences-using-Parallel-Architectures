@@ -1,3 +1,9 @@
 data/DNASequences.txt
 
 .vscode/
+
+output/*
+!output/.gitkeep
+
+# Compiled binaries
+serial_code/serial_code
