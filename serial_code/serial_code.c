@@ -16,7 +16,7 @@ int load_sequences(const char *filename)
     if ( file == NULL ) {
         perror("File Open Error");
         printf("Error opening file %s: %d", filename, errno);
-        return -1;  
+        return -1; // Change this in next commit
     }
 
     int count = 0;
@@ -69,6 +69,25 @@ void smith_waterman(char* seq1_list, char* seq2_list, int index)
     free(H);
 }
 
+void save_score_matrix(const char *filename)
+{
+    FILE *file = fopen(filename, "w");
+    if (file == NULL)
+    {
+        perror("File Open Error");
+        printf("Error opening file %s: %d\n", filename, errno);
+        exit(1);
+    }
+
+    for(int i = 0; i < MAX_PAIRS; i++)
+    {
+        fprintf(file, "Index %d, Score: %d\n", i, score_matrix[i]);
+    }
+
+    fclose(file);
+    printf("Score matrix saved to %s\n", filename);
+}
+
 int main()
 {
     int n = load_sequences("../data/DNASequences.txt");
@@ -90,6 +109,6 @@ int main()
     long end_time = (end.tv_sec * 1000000 + end.tv_usec);
     long elapsed_time = end_time - start_time;
     printf("Total time taken: %0.6f seconds\n", (float)elapsed_time / 1000000);
-}
 
-// Must save the results of the score matrix in a separate file
+    save_score_matrix("../output/serial_code_output_max_scores.txt");
+}
