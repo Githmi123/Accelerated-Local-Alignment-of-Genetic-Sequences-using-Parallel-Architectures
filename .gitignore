@@ -6,4 +6,5 @@ output/*
 !output/.gitkeep
 
 # Compiled binaries
-serial_code/*.o
+serial_code/serial_code
+phase01/using_openmp
