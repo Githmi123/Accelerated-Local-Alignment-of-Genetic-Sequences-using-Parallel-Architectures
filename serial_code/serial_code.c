@@ -16,7 +16,7 @@ int load_sequences(const char *filename)
     if ( file == NULL ) {
         perror("File Open Error");
         printf("Error opening file %s: %d", filename, errno);
-        return -1; // Change this in next commit
+        exit(1);
     }
 
     int count = 0;
