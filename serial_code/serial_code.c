@@ -10,7 +10,8 @@ char seq1_list[MAX_PAIRS][MAX_SEQ_LENGTH];
 char seq2_list[MAX_PAIRS][MAX_SEQ_LENGTH];
 int score_matrix[MAX_PAIRS];
 
-int load_sequences(const char *filename)
+// TODO: Make this function common to all implementations
+int load_sequences(const char *filename) 
 {
     FILE *file = fopen(filename, "r");
     if ( file == NULL ) {
