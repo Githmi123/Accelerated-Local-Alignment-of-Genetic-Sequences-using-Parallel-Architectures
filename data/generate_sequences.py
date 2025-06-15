@@ -9,4 +9,4 @@ with open("DNASequences.txt", "w") as file:
         seq2 = generate_sequence(200)
         file.write(f"{seq1},{seq2}\n")
 
-# If possible, write a Makefile
+# TODO: If possible, write a Makefile
