@@ -83,6 +83,10 @@ void save_score_matrix(const char *filename)
 
 int main()
 {
+    printf("\n"
+           "========================================\n"
+           "Smith-Waterman Algorithm - Using CUDA\n"
+           "========================================\n");
     int n = load_sequences("data/DNASequences.txt");
     printf("Loaded %d pairs of sequences.\n", n);
 
