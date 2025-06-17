@@ -99,6 +99,12 @@ int main()
     char *h_offsets = malloc(n * sizeof(int));
     char *h_scores = malloc(n * sizeof(int));
 
+    for ( int i = 0; i < n; i++ )
+    {
+        memcpy(&h_seq1[i * MAX_SEQ_LENGTH], seq1_list[i], MAX_SEQ_LENGTH);
+        memcpy(&h_seq2[i * MAX_SEQ_LENGTH], seq2_list[i], MAX_SEQ_LENGTH);
+    }
+
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
