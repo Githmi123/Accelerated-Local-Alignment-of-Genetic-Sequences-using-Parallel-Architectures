@@ -128,5 +128,7 @@ int main()
 
     cudaMemcpy(h_scores, d_scores, n * sizeof(int), cudaMemcpyDeviceToHost);
 
+    memcpy(score_matrix, h_scores, n * sizeof(int));
+
     save_score_matrix("../output/serial_code_output_max_scores.txt");
 }
