@@ -30,7 +30,7 @@ int load_sequences(const char *filename)
     return count;
 }
 
-void smith_waterman(char* seq1_list, char* seq2_list, int index)
+__global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets, int* d_scores, int max_len)
 {
     int len1 = strlen(seq1_list);
     int len2 = strlen(seq2_list);
@@ -119,6 +119,8 @@ int main()
 
     int threads_per_block = 256; // TODO: Adjust the number and see
     int num_blocks = (n + threads_per_block - 1) / threads_per_block;
+
+    smith_waterman_kernel<<<num_blocks, threads_per_block>>>(d_seq1, d_seq2, d_offsets, d_scores, MAX_SEQ_LENGTH);
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
