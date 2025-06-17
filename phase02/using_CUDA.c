@@ -112,16 +112,10 @@ int main()
     int threads_per_block = 256; // TODO: Adjust the number and see
     int num_blocks = (n + threads_per_block - 1) / threads_per_block;
 
-    smith_waterman_kernel<<<num_blocks, threads_per_block>>>(d_seq1, d_seq2, d_offsets, d_scores);
-
     struct timeval start, end;
     gettimeofday(&start, NULL);
 
-    for (int i = 0; i < n; i++)
-
-    {
-        smith_waterman(seq1_list[i], seq2_list[i], i);
-    }
+    smith_waterman_kernel<<<num_blocks, threads_per_block>>>(d_seq1, d_seq2, d_offsets, d_scores);
 
     gettimeofday(&end, NULL);
 
@@ -131,6 +125,8 @@ int main()
     long end_time = (end.tv_sec * 1000000 + end.tv_usec);
     long elapsed_time = end_time - start_time;
     printf("Total time taken: %0.6f seconds\n", (float)elapsed_time / 1000000);
+
+    cudaMemcpy(h_scores, d_scores, n * sizeof(int), cudaMemcpyDeviceToHost);
 
     save_score_matrix("../output/serial_code_output_max_scores.txt");
 }
