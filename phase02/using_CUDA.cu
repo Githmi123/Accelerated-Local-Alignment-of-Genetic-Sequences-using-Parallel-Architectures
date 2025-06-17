@@ -83,7 +83,7 @@ void save_score_matrix(const char *filename)
 
 int main()
 {
-    int n = load_sequences("../data/DNASequences.txt");
+    int n = load_sequences("data/DNASequences.txt");
     printf("Loaded %d pairs of sequences.\n", n);
 
     char *h_seq1 = (char*) malloc(n * MAX_SEQ_LENGTH * sizeof(char));
@@ -140,5 +140,5 @@ int main()
     free(h_offsets);
     free(h_scores);
 
-    save_score_matrix("../output/phase02_code_output_max_scores.txt");
+    save_score_matrix("output/phase02_code_output_max_scores.txt");
 }

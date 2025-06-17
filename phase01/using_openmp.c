@@ -91,7 +91,7 @@ void save_score_matrix(const char *filename)
 
 int main()
 {
-    int n = load_sequences("../data/DNASequences.txt");
+    int n = load_sequences("data/DNASequences.txt");
     printf("Loaded %d pairs of sequences.\n", n);
 
     struct timeval start, end;
@@ -112,5 +112,5 @@ int main()
     long elapsed_time = end_time - start_time;
     printf("Total time taken: %0.6f seconds\n", (float)elapsed_time / 1000000);
 
-    save_score_matrix("../output/phase01_code_output_max_scores.txt");
+    save_score_matrix("output/phase01_code_output_max_scores.txt");
 }
