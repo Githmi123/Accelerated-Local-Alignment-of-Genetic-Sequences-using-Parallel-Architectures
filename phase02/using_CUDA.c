@@ -109,7 +109,7 @@ int main()
     cudaMemcpy(d_seq2, h_seq2, n * MAX_SEQ_LENGTH, cudaMemcpyHostToDevice);
     cudaMemcpy(d_offsets, h_offsets, n * sizeof(int), cudaMemcpyHostToDevice);
 
-    int threads_per_block = 256; // TODO: Adjust the number and see
+    int threads_per_block = 256;
     int num_blocks = (n + threads_per_block - 1) / threads_per_block;
 
     struct timeval start, end;
