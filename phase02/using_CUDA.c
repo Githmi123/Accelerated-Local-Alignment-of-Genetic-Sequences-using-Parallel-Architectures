@@ -113,6 +113,10 @@ int main()
         h_offsets[i] = i;
     }
 
+    cudaMemcpy(d_seq1, h_seq1, n * MAX_SEQ_LENGTH, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_seq2, h_seq2, n * MAX_SEQ_LENGTH, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_offsets, h_offsets, n * sizeof(int), cudaMemcpyHostToDevice);
+
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
