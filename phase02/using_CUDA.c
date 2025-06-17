@@ -99,6 +99,13 @@ int main()
     char *h_offsets = malloc(n * sizeof(int));
     char *h_scores = malloc(n * sizeof(int));
 
+    char *d_seq1, *d_seq2;
+    int *d_offsets, *d_scores;
+    cudaMalloc(&d_seq1, n * MAX_SEQ_LENGTH * sizeof(char));
+    cudaMalloc(&d_seq2, n * MAX_SEQ_LENGTH * sizeof(char));
+    cudaMalloc(&d_offsets, n * sizeof(int));
+    cudaMalloc(&d_scores, n * sizeof(int));
+
     for ( int i = 0; i < n; i++ )
     {
         memcpy(&h_seq1[i * MAX_SEQ_LENGTH], seq1_list[i], MAX_SEQ_LENGTH);
