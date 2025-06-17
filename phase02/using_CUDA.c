@@ -30,8 +30,7 @@ int load_sequences(const char *filename)
     return count;
 }
 
-__global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets, int* d_scores)
-{
+__global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets, int* d_scores)    {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int offset = d_offsets[idx];
     char* s1_pointer = &d_seq1[offset + MAX_SEQ_LENGTH];
@@ -52,7 +51,7 @@ __global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets
             score_diagonal = H[i - 1][j - 1] + (s1_pointer[i - 1] == s2_pointer[j - 1] ? MATCHING_SCORE : MISMATCHING_SCORE);
             score_up = H[i - 1][j] + GAP_PENALTY;
             score_left = H[i][j - 1] + GAP_PENALTY;
-            H[i][j] = fmax(0, fmax(score_diagonal, fmax(score_up, score_left)));
+            H[i][j] = max(0, max(score_diagonal, max(score_up, score_left)));
 
             if (H[i][j] > max_score) 
                 max_score = H[i][j];
@@ -86,10 +85,10 @@ int main()
     int n = load_sequences("../data/DNASequences.txt");
     printf("Loaded %d pairs of sequences.\n", n);
 
-    char *h_seq1 = malloc(n * MAX_SEQ_LENGTH * sizeof(char));
-    char *h_seq2 = malloc(n * MAX_SEQ_LENGTH * sizeof(char));
-    char *h_offsets = malloc(n * sizeof(int));
-    char *h_scores = malloc(n * sizeof(int));
+    char *h_seq1 = (char*) malloc(n * MAX_SEQ_LENGTH * sizeof(char));
+    char *h_seq2 = (char*) malloc(n * MAX_SEQ_LENGTH * sizeof(char));
+    char *h_offsets = (int*) malloc(n * sizeof(int));
+    char *h_scores = (int*) malloc(n * sizeof(int));
 
     char *d_seq1, *d_seq2;
     int *d_offsets, *d_scores;
