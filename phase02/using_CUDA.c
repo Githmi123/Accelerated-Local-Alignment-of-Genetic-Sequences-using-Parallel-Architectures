@@ -30,18 +30,18 @@ int load_sequences(const char *filename)
     return count;
 }
 
-__global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets, int* d_scores, int max_len)
+__global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets, int* d_scores)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int offset = d_offsets[idx];
-    char* s1_pointer = &d_seq1[offset + max_len];
-    char* s2_pointer = &d_seq2[offset + max_len];
+    char* s1_pointer = &d_seq1[offset + MAX_SEQ_LENGTH];
+    char* s2_pointer = &d_seq2[offset + MAX_SEQ_LENGTH];
 
-    int len1 = strlen(seq1_list);
-    int len2 = strlen(seq2_list);
+    int len1 = MAX_SEQ_LENGTH;
+    int len2 = MAX_SEQ_LENGTH;
 
     // High Scoring Local Alignment Matrix (H)
-    int** H = malloc((len1 + 1) * sizeof(int*));
+    int H[MAX_SEQ_LENGTH][MAX_SEQ_LENGTH] = {0};
 
     for (int i = 0; i <= len1 ; i++) // Can be parallelized
     {
@@ -125,7 +125,7 @@ int main()
     int threads_per_block = 256; // TODO: Adjust the number and see
     int num_blocks = (n + threads_per_block - 1) / threads_per_block;
 
-    smith_waterman_kernel<<<num_blocks, threads_per_block>>>(d_seq1, d_seq2, d_offsets, d_scores, MAX_SEQ_LENGTH);
+    smith_waterman_kernel<<<num_blocks, threads_per_block>>>(d_seq1, d_seq2, d_offsets, d_scores);
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
