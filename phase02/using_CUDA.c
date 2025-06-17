@@ -59,14 +59,7 @@ __global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets
         }
     }
 
-    score_matrix[index] = max_score;
-    // printf("Max score for pair %d: %d\n", index, max_score);
-
-    for ( int i = 0; i <= len1; i++ ) // Can be parallelized
-    {
-        free(H[i]);
-    }
-    free(H);
+    d_scores[idx] = max_score;
 }
 
 void save_score_matrix(const char *filename)
