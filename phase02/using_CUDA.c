@@ -130,5 +130,15 @@ int main()
 
     memcpy(score_matrix, h_scores, n * sizeof(int));
 
-    save_score_matrix("../output/serial_code_output_max_scores.txt");
+    cudaFree(d_seq1);
+    cudaFree(d_seq2);
+    cudaFree(d_offsets);
+    cudaFree(d_scores);
+
+    free(h_seq1);
+    free(h_seq2);
+    free(h_offsets);
+    free(h_scores);
+
+    save_score_matrix("../output/phase02_code_output_max_scores.txt");
 }
