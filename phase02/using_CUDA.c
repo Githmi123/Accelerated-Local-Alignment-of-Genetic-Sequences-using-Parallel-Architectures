@@ -30,7 +30,8 @@ int load_sequences(const char *filename)
     return count;
 }
 
-__global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets, int* d_scores)    {
+__global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets, int* d_scores)    
+{
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int offset = d_offsets[idx];
     char* s1_pointer = &d_seq1[offset + MAX_SEQ_LENGTH];
