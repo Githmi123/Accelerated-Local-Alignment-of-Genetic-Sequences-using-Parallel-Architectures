@@ -33,7 +33,9 @@ int load_sequences(const char *filename)
 __global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets, int* d_scores, int max_len)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    
+    int offset = d_offsets[idx];
+    char* s1_pointer = &d_seq1[offset + max_len];
+    char* s2_pointer = &d_seq2[offset + max_len];
 
     int len1 = strlen(seq1_list);
     int len2 = strlen(seq2_list);
