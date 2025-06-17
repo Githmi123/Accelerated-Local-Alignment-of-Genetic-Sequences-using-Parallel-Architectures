@@ -43,19 +43,13 @@ __global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets
     // High Scoring Local Alignment Matrix (H)
     int H[MAX_SEQ_LENGTH][MAX_SEQ_LENGTH] = {0};
 
-    for (int i = 0; i <= len1 ; i++) // Can be parallelized
-    {
-        H[i] = malloc((len2 + 1) * sizeof(int));
-        memset(H[i], 0, (len2 + 1) * sizeof(int)); // Initialize all rows to zero
-    }
-
     int score_diagonal, score_up, score_left, max_score = 0;
 
     for (int i = 1; i <= len1 ; i++)
     {
         for (int j = 1; j <= len2 ; j++)
         {
-            score_diagonal = H[i - 1][j - 1] + (seq1_list[i - 1] == seq2_list[j - 1] ? MATCHING_SCORE : MISMATCHING_SCORE);
+            score_diagonal = H[i - 1][j - 1] + (s1_pointer[i - 1] == s2_pointer[j - 1] ? MATCHING_SCORE : MISMATCHING_SCORE);
             score_up = H[i - 1][j] + GAP_PENALTY;
             score_left = H[i][j - 1] + GAP_PENALTY;
             H[i][j] = fmax(0, fmax(score_diagonal, fmax(score_up, score_left)));
