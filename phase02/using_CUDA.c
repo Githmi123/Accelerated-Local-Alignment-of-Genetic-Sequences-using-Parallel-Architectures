@@ -110,6 +110,7 @@ int main()
     {
         memcpy(&h_seq1[i * MAX_SEQ_LENGTH], seq1_list[i], MAX_SEQ_LENGTH);
         memcpy(&h_seq2[i * MAX_SEQ_LENGTH], seq2_list[i], MAX_SEQ_LENGTH);
+        h_offsets[i] = i;
     }
 
 
