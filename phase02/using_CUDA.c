@@ -30,19 +30,18 @@ int load_sequences(const char *filename)
     return count;
 }
 
-__global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets, int* d_scores, int max_len)
+__global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets, int* d_scores)
 {
-    int len1 = strlen(seq1_list);
-    int len2 = strlen(seq2_list);
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int offset = d_offsets[idx];
+    char* s1_pointer = &d_seq1[offset + MAX_SEQ_LENGTH];
+    char* s2_pointer = &d_seq2[offset + MAX_SEQ_LENGTH];
+
+    int len1 = MAX_SEQ_LENGTH;
+    int len2 = MAX_SEQ_LENGTH;
 
     // High Scoring Local Alignment Matrix (H)
-    int** H = malloc((len1 + 1) * sizeof(int*));
-
-    for (int i = 0; i <= len1 ; i++) // Can be parallelized
-    {
-        H[i] = malloc((len2 + 1) * sizeof(int));
-        memset(H[i], 0, (len2 + 1) * sizeof(int)); // Initialize all rows to zero
-    }
+    int H[MAX_SEQ_LENGTH][MAX_SEQ_LENGTH] = {0};
 
     int score_diagonal, score_up, score_left, max_score = 0;
 
@@ -50,7 +49,7 @@ __global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets
     {
         for (int j = 1; j <= len2 ; j++)
         {
-            score_diagonal = H[i - 1][j - 1] + (seq1_list[i - 1] == seq2_list[j - 1] ? MATCHING_SCORE : MISMATCHING_SCORE);
+            score_diagonal = H[i - 1][j - 1] + (s1_pointer[i - 1] == s2_pointer[j - 1] ? MATCHING_SCORE : MISMATCHING_SCORE);
             score_up = H[i - 1][j] + GAP_PENALTY;
             score_left = H[i][j - 1] + GAP_PENALTY;
             H[i][j] = fmax(0, fmax(score_diagonal, fmax(score_up, score_left)));
@@ -60,14 +59,7 @@ __global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets
         }
     }
 
-    score_matrix[index] = max_score;
-    // printf("Max score for pair %d: %d\n", index, max_score);
-
-    for ( int i = 0; i <= len1; i++ ) // Can be parallelized
-    {
-        free(H[i]);
-    }
-    free(H);
+    d_scores[idx] = max_score;
 }
 
 void save_score_matrix(const char *filename)
@@ -120,16 +112,10 @@ int main()
     int threads_per_block = 256; // TODO: Adjust the number and see
     int num_blocks = (n + threads_per_block - 1) / threads_per_block;
 
-    smith_waterman_kernel<<<num_blocks, threads_per_block>>>(d_seq1, d_seq2, d_offsets, d_scores, MAX_SEQ_LENGTH);
-
     struct timeval start, end;
     gettimeofday(&start, NULL);
 
-    for (int i = 0; i < n; i++)
-
-    {
-        smith_waterman(seq1_list[i], seq2_list[i], i);
-    }
+    smith_waterman_kernel<<<num_blocks, threads_per_block>>>(d_seq1, d_seq2, d_offsets, d_scores);
 
     gettimeofday(&end, NULL);
 
@@ -140,5 +126,19 @@ int main()
     long elapsed_time = end_time - start_time;
     printf("Total time taken: %0.6f seconds\n", (float)elapsed_time / 1000000);
 
-    save_score_matrix("../output/serial_code_output_max_scores.txt");
+    cudaMemcpy(h_scores, d_scores, n * sizeof(int), cudaMemcpyDeviceToHost);
+
+    memcpy(score_matrix, h_scores, n * sizeof(int));
+
+    cudaFree(d_seq1);
+    cudaFree(d_seq2);
+    cudaFree(d_offsets);
+    cudaFree(d_scores);
+
+    free(h_seq1);
+    free(h_seq2);
+    free(h_offsets);
+    free(h_scores);
+
+    save_score_matrix("../output/phase02_code_output_max_scores.txt");
 }
