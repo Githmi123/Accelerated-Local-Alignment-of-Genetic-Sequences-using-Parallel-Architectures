@@ -88,8 +88,8 @@ int main()
 
     char *h_seq1 = (char*) malloc(n * MAX_SEQ_LENGTH * sizeof(char));
     char *h_seq2 = (char*) malloc(n * MAX_SEQ_LENGTH * sizeof(char));
-    char *h_offsets = (int*) malloc(n * sizeof(int));
-    char *h_scores = (int*) malloc(n * sizeof(int));
+    int *h_offsets = (int*) malloc(n * sizeof(int));
+    int *h_scores = (int*) malloc(n * sizeof(int));
 
     char *d_seq1, *d_seq2;
     int *d_offsets, *d_scores;
