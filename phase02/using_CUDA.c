@@ -5,6 +5,7 @@
 #include "../constants.h"
 #include <sys/time.h>
 #include <math.h>
+#include <cuda_runtime.h>
 
 char seq1_list[MAX_PAIRS][MAX_SEQ_LENGTH];
 char seq2_list[MAX_PAIRS][MAX_SEQ_LENGTH];
@@ -93,10 +94,17 @@ int main()
     int n = load_sequences("../data/DNASequences.txt");
     printf("Loaded %d pairs of sequences.\n", n);
 
+    char *h_seq1 = malloc(n * MAX_SEQ_LENGTH * sizeof(char));
+    char *h_seq2 = malloc(n * MAX_SEQ_LENGTH * sizeof(char));
+    char *h_offsets = malloc(n * sizeof(int));
+    char *h_scores = malloc(n * sizeof(int));
+
+
     struct timeval start, end;
     gettimeofday(&start, NULL);
 
     for (int i = 0; i < n; i++)
+
     {
         smith_waterman(seq1_list[i], seq2_list[i], i);
     }
