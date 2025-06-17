@@ -5,13 +5,13 @@
 #include "../constants.h"
 #include <sys/time.h>
 #include <math.h>
+#include <cuda_runtime.h>
 
 char seq1_list[MAX_PAIRS][MAX_SEQ_LENGTH];
 char seq2_list[MAX_PAIRS][MAX_SEQ_LENGTH];
 int score_matrix[MAX_PAIRS];
 
-//TODO: Make this function common to all implementations
-int load_sequences(const char *filename) 
+int load_sequences(const char *filename)
 {
     FILE *file = fopen(filename, "r");
     if ( file == NULL ) {
@@ -30,7 +30,7 @@ int load_sequences(const char *filename)
     return count;
 }
 
-void smith_waterman(char* seq1_list, char* seq2_list, int index)
+__global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets, int* d_scores, int max_len)
 {
     int len1 = strlen(seq1_list);
     int len2 = strlen(seq2_list);
@@ -94,10 +94,39 @@ int main()
     int n = load_sequences("../data/DNASequences.txt");
     printf("Loaded %d pairs of sequences.\n", n);
 
+    char *h_seq1 = malloc(n * MAX_SEQ_LENGTH * sizeof(char));
+    char *h_seq2 = malloc(n * MAX_SEQ_LENGTH * sizeof(char));
+    char *h_offsets = malloc(n * sizeof(int));
+    char *h_scores = malloc(n * sizeof(int));
+
+    char *d_seq1, *d_seq2;
+    int *d_offsets, *d_scores;
+    cudaMalloc(&d_seq1, n * MAX_SEQ_LENGTH * sizeof(char));
+    cudaMalloc(&d_seq2, n * MAX_SEQ_LENGTH * sizeof(char));
+    cudaMalloc(&d_offsets, n * sizeof(int));
+    cudaMalloc(&d_scores, n * sizeof(int));
+
+    for ( int i = 0; i < n; i++ )
+    {
+        memcpy(&h_seq1[i * MAX_SEQ_LENGTH], seq1_list[i], MAX_SEQ_LENGTH);
+        memcpy(&h_seq2[i * MAX_SEQ_LENGTH], seq2_list[i], MAX_SEQ_LENGTH);
+        h_offsets[i] = i;
+    }
+
+    cudaMemcpy(d_seq1, h_seq1, n * MAX_SEQ_LENGTH, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_seq2, h_seq2, n * MAX_SEQ_LENGTH, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_offsets, h_offsets, n * sizeof(int), cudaMemcpyHostToDevice);
+
+    int threads_per_block = 256; // TODO: Adjust the number and see
+    int num_blocks = (n + threads_per_block - 1) / threads_per_block;
+
+    smith_waterman_kernel<<<num_blocks, threads_per_block>>>(d_seq1, d_seq2, d_offsets, d_scores, MAX_SEQ_LENGTH);
+
     struct timeval start, end;
     gettimeofday(&start, NULL);
 
     for (int i = 0; i < n; i++)
+
     {
         smith_waterman(seq1_list[i], seq2_list[i], i);
     }
