@@ -34,8 +34,8 @@ __global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int offset = d_offsets[idx];
-    char* s1_pointer = &d_seq1[offset + MAX_SEQ_LENGTH];
-    char* s2_pointer = &d_seq2[offset + MAX_SEQ_LENGTH];
+    char* s1_pointer = &d_seq1[offset * MAX_SEQ_LENGTH];
+    char* s2_pointer = &d_seq2[offset * MAX_SEQ_LENGTH];
 
     int len1 = MAX_SEQ_LENGTH;
     int len2 = MAX_SEQ_LENGTH;
