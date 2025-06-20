@@ -30,15 +30,17 @@ int load_sequences(const char *filename)
     return count;
 }
 
-void smith_waterman(char* seq1_list, char* seq2_list, int index)
+void smith_waterman(char* seq1, char* seq2, int index)
 {
-    int len1 = strlen(seq1_list);
-    int len2 = strlen(seq2_list);
+
+    int len1 = strlen(seq1);
+    int len2 = strlen(seq2);
 
     // High Scoring Local Alignment Matrix (H)
     int** H = malloc((len1 + 1) * sizeof(int*));
 
-    for (int i = 0; i <= len1 ; i++) // Can be parallelized
+    #pragma omp parallel for schedule(static)
+    for (int i = 0; i <= len1 ; i++)
     {
         H[i] = malloc((len2 + 1) * sizeof(int));
         memset(H[i], 0, (len2 + 1) * sizeof(int)); // Initialize all rows to zero
@@ -50,7 +52,7 @@ void smith_waterman(char* seq1_list, char* seq2_list, int index)
     {
         for (int j = 1; j <= len2 ; j++)
         {
-            score_diagonal = H[i - 1][j - 1] + (seq1_list[i - 1] == seq2_list[j - 1] ? MATCHING_SCORE : MISMATCHING_SCORE);
+            score_diagonal = H[i - 1][j - 1] + (seq1[i - 1] == seq2[j - 1] ? MATCHING_SCORE : MISMATCHING_SCORE);
             score_up = H[i - 1][j] + GAP_PENALTY;
             score_left = H[i][j - 1] + GAP_PENALTY;
             H[i][j] = fmax(0, fmax(score_diagonal, fmax(score_up, score_left)));
@@ -63,7 +65,8 @@ void smith_waterman(char* seq1_list, char* seq2_list, int index)
     score_matrix[index] = max_score;
     // printf("Max score for pair %d: %d\n", index, max_score);
 
-    for ( int i = 0; i <= len1; i++ ) // Can be parallelized
+    #pragma omp parallel for schedule(static)
+    for ( int i = 0; i <= len1; i++ )
     {
         free(H[i]);
     }
@@ -91,16 +94,29 @@ void save_score_matrix(const char *filename)
 
 int main()
 {
-    int n = load_sequences("../data/DNASequences.txt");
+    printf("\n"
+           "========================================\n"
+           "Smith-Waterman Algorithm - Using OpenMP\n"
+           "========================================\n");
+    int n = load_sequences("data/DNASequences.txt");
     printf("Loaded %d pairs of sequences.\n", n);
 
     struct timeval start, end;
     gettimeofday(&start, NULL);
 
-    #pragma omp parallel for schedule(static)
-    for (int i = 0; i < n; i++)
+    #pragma omp parallel
     {
-        smith_waterman(seq1_list[i], seq2_list[i], i);
+        #pragma omp single
+        {
+            int num_threads = omp_get_num_threads();
+            printf("Using %d OpenMP threads.\n", num_threads);
+        }
+
+        #pragma omp for schedule(static)
+        for (int i = 0; i < n; i++)
+        {
+            smith_waterman(seq1_list[i], seq2_list[i], i);
+        }
     }
 
     gettimeofday(&end, NULL);
@@ -112,5 +128,5 @@ int main()
     long elapsed_time = end_time - start_time;
     printf("Total time taken: %0.6f seconds\n", (float)elapsed_time / 1000000);
 
-    save_score_matrix("../output/phase01_code_output_max_scores.txt");
+    save_score_matrix("output/phase01_code_output_max_scores.txt");
 }

@@ -34,8 +34,8 @@ __global__ void smith_waterman_kernel(char* d_seq1, char* d_seq2, int* d_offsets
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int offset = d_offsets[idx];
-    char* s1_pointer = &d_seq1[offset + MAX_SEQ_LENGTH];
-    char* s2_pointer = &d_seq2[offset + MAX_SEQ_LENGTH];
+    char* s1_pointer = &d_seq1[offset * MAX_SEQ_LENGTH];
+    char* s2_pointer = &d_seq2[offset * MAX_SEQ_LENGTH];
 
     int len1 = MAX_SEQ_LENGTH;
     int len2 = MAX_SEQ_LENGTH;
@@ -83,13 +83,17 @@ void save_score_matrix(const char *filename)
 
 int main()
 {
-    int n = load_sequences("../data/DNASequences.txt");
+    printf("\n"
+           "========================================\n"
+           "Smith-Waterman Algorithm - Using CUDA\n"
+           "========================================\n");
+    int n = load_sequences("data/DNASequences.txt");
     printf("Loaded %d pairs of sequences.\n", n);
 
     char *h_seq1 = (char*) malloc(n * MAX_SEQ_LENGTH * sizeof(char));
     char *h_seq2 = (char*) malloc(n * MAX_SEQ_LENGTH * sizeof(char));
-    char *h_offsets = (int*) malloc(n * sizeof(int));
-    char *h_scores = (int*) malloc(n * sizeof(int));
+    int *h_offsets = (int*) malloc(n * sizeof(int));
+    int *h_scores = (int*) malloc(n * sizeof(int));
 
     char *d_seq1, *d_seq2;
     int *d_offsets, *d_scores;
@@ -140,5 +144,5 @@ int main()
     free(h_offsets);
     free(h_scores);
 
-    save_score_matrix("../output/phase02_code_output_max_scores.txt");
+    save_score_matrix("output/phase02_code_output_max_scores.txt");
 }
