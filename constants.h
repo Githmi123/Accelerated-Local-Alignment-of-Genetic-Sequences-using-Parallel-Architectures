@@ -2,7 +2,7 @@
 #define CONSTANTS_H
 
 # define MAX_SEQ_LENGTH 201 
-# define MAX_PAIRS 1000
+# define MAX_PAIRS 10000
 # define MATCHING_SCORE 5
 # define MISMATCHING_SCORE -3
 # define GAP_PENALTY -4
